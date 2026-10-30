@@ -9,7 +9,9 @@ import base64
 from Crypto.PublicKey import RSA
 from Crypto.Cipher import PKCS1_OAEP
 from Crypto.Hash import SHA256
-
+import hashlib
+from cryptography.hazmat.primitives import serialization
+from pyrandomart import randomart
 # 默认密钥长度（位）
 DEFAULT_BITS = 2048
 
@@ -78,3 +80,19 @@ def decrypt(ciphertext_b64, private_key):
         for i in range(0, len(encrypted), key_size)
     )
     return decrypted.decode("utf-8")
+def verify_public_key(public_key):
+    public_key = serialization.load_pem_public_key(public_key)
+
+    # 2. 序列化为 DER（SubjectPublicKeyInfo）再算 SHA256
+    #    注意：OpenSSH 的 SHA256 指纹是对 SSH wire format 的公钥 blob 做哈希，
+    #    DER 与 SSH blob 字节不同，所以严格来说这样得到的指纹与 ssh-keygen -l 不完全一致。
+    #    若要和 ssh-keygen 完全一致，需要用下面的“方式二”。
+    der = public_key.public_bytes(
+        encoding=serialization.Encoding.DER,
+        format=serialization.PublicFormat.SubjectPublicKeyInfo,
+    )
+    hash_bytes = hashlib.sha256(der).digest()
+
+    # 3. 生成图样
+    art = randomart(hash_bytes, header='RSA 4096', footer='SHA256')
+    return art

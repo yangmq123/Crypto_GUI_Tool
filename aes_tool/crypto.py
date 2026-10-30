@@ -23,11 +23,12 @@ def generate_key(length=KEY_BYTES):
     upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     lower = "abcdefghijklmnopqrstuvwxyz"
     symbols = "!@#$%^&*()-_=+[]{};:,.<>?/~"
-    alphabet = upper + lower + symbols
+    digits = "0123456789"
+    alphabet = upper + lower + symbols+digits
 
     # 保证至少包含一个大写字母、一个小写字母和一个符号
-    chars = [secrets.choice(upper), secrets.choice(lower), secrets.choice(symbols)]
-    chars += [secrets.choice(alphabet) for _ in range(length - 3)]
+    chars = [secrets.choice(upper), secrets.choice(lower), secrets.choice(symbols), secrets.choice(digits)]
+    chars += [secrets.choice(alphabet) for _ in range(length - 4)]
     secrets.SystemRandom().shuffle(chars)
     return "".join(chars)
 
